@@ -13,7 +13,16 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("Welcome to the employee management system!")
+    console.log("-----------------------------------------------")
+    console.log("-----------------------------------------------\n")
+    console.log("--------------------Welcome--------------------")
+    console.log("----------------------to-----------------------")
+    console.log("----------------------the----------------------")
+    console.log("--------------------employee-------------------")
+    console.log("-------------------management------------------")
+    console.log("--------------------system!--------------------\n")
+    console.log("-----------------------------------------------")
+    console.log("-----------------------------------------------\n")
     runManagementQuery();
 });
 
@@ -31,10 +40,17 @@ function runManagementQuery() {
             ]
         })
         .then(function (answer) {
-            console.log(answer);
+
             switch (answer.action) {
                 case "Add Departments, Roles, or Employees?":
-                    console.log("time to make the add function");
+                    console.log("-----------------------------------------------")
+                    console.log("-----------------------------------------------\n")
+                    console.log("Adding departments, roles, or employees\n");
+                    console.log("-----------------------------------------------")
+                    console.log("-----------------------------------------------\n")
+                    console.log("Follow the steps provided\n");
+                    console.log("-----------------------------------------------")
+                    console.log("-----------------------------------------------\n")
                     runAddQuery();
                     break;
 
@@ -47,6 +63,9 @@ function runManagementQuery() {
                     runManagementQuery();
                     break;
                 case "exit":
+                    console.log("--------------------------------------------------------------------------")
+                    console.log("|-We hope you have enjoyed your time with the employee management system-|")
+                    console.log("--------------------------------------------------------------------------")
                     connection.end();
                     break;
             }
@@ -67,21 +86,30 @@ function runAddQuery() {
             ]
         })
         .then(function (add) {
-            console.log(add.action);
+
             switch (add.action) {
                 case "Add Departments":
+                    console.log("\n-----------------------------------------------\n");
+                    console.log("--------------Adding a department--------------");
+                    console.log("\n-----------------------------------------------\n");
                     addDepartment();
                     break;
                 case "Add Role":
-                    console.log("time to add the add role function");
-                    runManagementQuery();
+                    console.log("\n-----------------------------------------------\n");
+                    console.log("-----------------Adding a role-----------------");
+                    console.log("\n-----------------------------------------------\n");
+                    addRole();
                     break;
                 case "Add Employee":
-                    console.log("time to add employee function")
+                    console.log("\n-----------------------------------------------\n");
+                    console.log("-------------Adding an employee----------------");
+                    console.log("\n-----------------------------------------------\n");
                     addEmployee();
                     break;
                 case "Go back":
-                    console.log("Returning you to the beginning");
+                    console.log("\n-----------------------------------------------\n");
+                    console.log("---------Returning you to the beginning--------");
+                    console.log("\n-----------------------------------------------\n");
                     runManagementQuery();
                     break;
             }
@@ -98,13 +126,17 @@ function addDepartment() {
             message: "What is the name of the department you would like to add?"
         })
         .then(function (department) {
-            console.log(department.dep)
-            var query = "INSERT INTO department (name) VALUES (?)";
-            var addDep = department.dep;
+
+            let query = "INSERT INTO department (name) VALUES (?)";
+            let addDep = department.dep;
 
             connection.query(query, addDep, function (err, result) {
                 if (err) throw err;
-                console.log("Department added: " + department.dep);
+                console.log("\n-----------------------------------------------\n")
+                console.log("-----------------------------------------------\n")
+                console.log("Department added: " + department.dep) + '\n';
+                console.log("-----------------------------------------------\n")
+                console.log("-----------------------------------------------\n")
                 runManagementQuery();
             })
         })
@@ -156,79 +188,160 @@ function addEmployee() {
             }
         ])
         .then(function (newEmployee) {
-            console.log(newEmployee)
-            var query = "INSERT INTO employee (first_name, last_name,role_id,manager_id) VALUES ?"
-            var roleId;
-            var managerId;
+
+            let empQuery = 'INSERT INTO employee (first_name, last_name,role_id,manager_id) VALUES (?)'
+            let empRoleId;
+            let empManagerId;
+            let empFirstName = newEmployee.firstName;
+            let empLastName = newEmployee.lastName;
             switch (newEmployee.roleId) {
                 case "Qa specialist":
-                    roleId = 2;
+                    empRoleId = 2;
                     break;
                 case "Sr content writer":
-                    roleId = 5;
+                    empRoleId = 5;
                     break;
                 case "Content Specialist":
-                    roleId = 6;
+                    empRoleId = 6;
                     break;
                 case "Software engineer":
-                    roleId = 8;
+                    empRoleId = 8;
                     break;
                 case "Sr account rep":
-                    roleId = 12;
+                    empRoleId = 12;
                     break;
                 case "Outbound sales rep":
-                    roleId = 13;
+                    empRoleId = 13;
                     break;
                 case "Ux designer":
-                    roleId = 16;
+                    empRoleId = 16;
                     break;
                 case "Product manager":
-                    roleId = 19;
+                    empRoleId = 19;
                     break;
             }
             switch (newEmployee.managerId) {
                 case "Ugo Ducket - QA Director":
-                    managerId = 9;
+                    empManagerId = 9;
                     break;
                 case "Brenelle Cubley - Sr. Developer":
-                    managerId = 10;
+                    empManagerId = 10;
                     break;
                 case "Brigitta Rosoni - Sr. Developer":
-                    managerId = 11;
+                    empManagerId = 11;
                     break;
                 case "Percy Veltman - Sr. Developer":
-                    managerId = 12;
+                    empManagerId = 12;
                     break;
                 case "Dante Collins - Director UX":
-                    managerId = 13;
+                    empManagerId = 13;
                     break;
                 case "Matteo Gobeaux - COO":
-                    managerId = 2;
+                    empManagerId = 2;
                     break;
                 case "Brent Grasha - CMO":
-                    managerId = 3;
+                    empManagerId = 3;
                     break;
                 case "Erica Romaguera - CTO":
-                    managerId = 4;
+                    empManagerId = 4;
                     break;
                 case "Dathyl Judd - SVP Sales":
-                    managerId = 6;
+                    empManagerId = 6;
                     break;
                 case "Irwin Spinello - VP Product":
-                    managerId = 8;
+                    empManagerId = 8;
                     break;
             }
-            var post = {
-                first_name: newEmployee.firstName,
-                last_name: newEmployee.lastName,
-                role_id: roleId,
-                manager_id: managerId
-            }
-            connection.query(query, post, function (err, result) {
+            var empPost = [
+                empFirstName,
+                empLastName,
+                empRoleId,
+                empManagerId
+            ]
+            connection.query(empQuery, ([empPost]), function (err, result) {
                 if (err) throw err;
-                console.log("Employee Added: " + newEmployee.firstName + " " + newEmployee.lastName)
+                console.log("\n-----------------------------------------------\n")
+                console.log("-----------------------------------------------\n")
+                console.log("Employee Added: " + empFirstName + " " + empLastName + '\n')
+                console.log("-----------------------------------------------\n")
+                console.log("-----------------------------------------------\n")
+                runManagementQuery();
             })
 
-            connection.end();
         })
 }
+function addRole() {
+    inquirer
+        .prompt([{
+            name: "role",
+            type: "input",
+            message: "What role would you like to add?"
+        },
+        {
+            name: "salary",
+            type: "input",
+            message: "What is the salary for this role?"
+        },
+        {
+            name: "dep",
+            type: "rawlist",
+            message: "Which department will this role belong to?",
+            choices: [
+                "operations",
+                "marketing",
+                "technology",
+                "administration",
+                "sales",
+                "finance",
+                "product",
+                "human resources"
+            ]
+        }
+        ]).then(function (role) {
+
+            let roleQuery = "INSERT INTO role (title, salary, department_id) VALUES(?)";
+            let title = role.role;
+            let salary = role.salary;
+            let depId;
+            switch (role.dep) {
+                case "operations":
+                    depId = 2;
+                    break;
+                case "marketing":
+                    depId = 3;
+                    break;
+                case "technology":
+                    depId = 4;
+                    break;
+                case "administration":
+                    depId = 5;
+                    break;
+                case "sales":
+                    depId = 6;
+                    break;
+                case "finance":
+                    depId = 7;
+                    break;
+                case "product":
+                    depId = 8;
+                    break;
+                case "human resources":
+                    depId = 9;
+                    break;
+            }
+            let rolePost = [
+                title,
+                salary,
+                depId
+            ];
+            connection.query(roleQuery, [rolePost], function (err, result) {
+                if (err) throw err;
+                console.log("-----------------------------------------------")
+                console.log("-----------------------------------------------\n")
+                console.log("Role Added: " + title + " will be placed in the " + role.dep + " department.\n")
+                console.log("-----------------------------------------------")
+                console.log("-----------------------------------------------")
+                runManagementQuery();
+            });
+        });
+};
