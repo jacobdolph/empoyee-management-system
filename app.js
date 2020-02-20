@@ -1,9 +1,9 @@
 const mysql = require("mysql");
-const express = require("express");
-const inquirer = require("inquirer");
-var app = express();
 
-var connection = mysql.createConnection({
+const inquirer = require("inquirer");
+
+
+const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
@@ -15,12 +15,11 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("-----------------------------------------------")
     console.log("-----------------------------------------------\n")
-    console.log("--------------------Welcome--------------------")
-    console.log("----------------------to-----------------------")
-    console.log("----------------------the----------------------")
-    console.log("--------------------employee-------------------")
-    console.log("-------------------management------------------")
-    console.log("--------------------system!--------------------\n")
+    console.log("                    Welcome                    ")
+    console.log("                    to the                      ")
+    console.log("                    employee                   ")
+    console.log("                   management                  ")
+    console.log("                    system!                   \n")
     console.log("-----------------------------------------------")
     console.log("-----------------------------------------------\n")
     runManagementQuery();
@@ -34,7 +33,7 @@ function runManagementQuery() {
             message: "What would you like to do?",
             choices: [
                 "Add Departments, Roles, or Employees?",
-                "View Departments, Roles, or Employees?",
+                "View Employees?",
                 "Update Employee Roles",
                 "exit"
             ]
@@ -54,9 +53,8 @@ function runManagementQuery() {
                     runAddQuery();
                     break;
 
-                case "View Departments, Roles, or Employees?":
-                    console.log("time to make the view function")
-                    runManagementQuery();
+                case "View Employees?":
+                    viewSelection();
                     break;
                 case "Update Employee Roles":
                     console.log("time to make the update function");
@@ -345,3 +343,72 @@ function addRole() {
             });
         });
 };
+
+function viewSelection() {
+    inquirer
+        .prompt({
+            name: "selection",
+            type: "rawlist",
+            message: "What would you like to do?",
+            choices: [
+                "View all Employees",
+                "View Employees by department",
+                "View Employees by role",
+                "go back"
+            ]
+        }).then(function (view) {
+            switch (view.selection) {
+                case "View all Employees":
+                    console.log("viewing all employees")
+                    viewAll();
+                    break;
+                case "View Employees by department":
+                    console.log("viewing department");
+                    viewSelection();
+                    break;
+                case "View Employees by role":
+                    console.log("viewing roles");
+                    viewSelection();
+                    break;
+                case "go back":
+                    runManagementQuery();
+                    break;
+            }
+        })
+}
+function viewAll() {
+    let viewAllQuery = "SELECT e.id ,CONCAT( e.first_name,' ', e.last_name) AS 'employee', role.title, role.salary, CONCAT(m.first_name,' ',m.last_name) AS 'manager' FROM ((employee e INNER JOIN role ON e.role_id=role.id) INNER JOIN employee m ON m.id=e.manager_id);"
+    connection.query(viewAllQuery, function (err, res) {
+        console.log(res);
+        console.log("EmployeeID           Name                    Title                   Salary                  Manager")
+        console.log("-----------------    --------------------    --------------------    --------------------    -------------------")
+        viewSelection();
+    })
+}
+
+// function viewDepartment() {
+//     inquirer
+//         .prompt({
+//             name: "dep",
+//             type: "rawlist",
+//             message: "Which department would you like to view?",
+//             choices: [
+//                 "operations",
+//                 "marketing",
+//                 "technology",
+//                 "administration",
+//                 "sales",
+//                 "finance",
+//                 "product",
+//                 "human resources",
+//                 "legal"
+//             ]
+//         }).then(function (view) {
+//             let depQuery = "SELECT department.name, employee.first_name, employee.last_name,role.title,role.salary FROM ((department INNER JOIN role on department.id = role.department_id) inner join employee on role.id = employee.role_id) WHERE department.name = '?'"
+
+//             connection.query(depQuery, view.dep, function (err, res) {
+//                 console.log(res.length + 'employees found!');
+//             })
+
+//         })
+// }
