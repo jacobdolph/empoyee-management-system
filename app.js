@@ -1,5 +1,5 @@
 const mysql = require("mysql");
-
+const Table = require('cli-table3');
 const inquirer = require("inquirer");
 
 
@@ -10,7 +10,6 @@ const connection = mysql.createConnection({
     password: process.env.MYSQL_PASSWORD,
     database: "company_db"
 });
-
 connection.connect(function (err) {
     if (err) throw err;
     console.log("-----------------------------------------------")
@@ -24,7 +23,6 @@ connection.connect(function (err) {
     console.log("-----------------------------------------------\n")
     runManagementQuery();
 });
-
 function runManagementQuery() {
     inquirer
         .prompt({
@@ -39,7 +37,6 @@ function runManagementQuery() {
             ]
         })
         .then(function (answer) {
-
             switch (answer.action) {
                 case "Add Departments, Roles, or Employees?":
                     console.log("-----------------------------------------------")
@@ -52,13 +49,12 @@ function runManagementQuery() {
                     console.log("-----------------------------------------------\n")
                     runAddQuery();
                     break;
-
                 case "View Employees?":
                     viewSelection();
                     break;
                 case "Update Employee Roles":
                     console.log("time to make the update function");
-                    runManagementQuery();
+                    updateRole();
                     break;
                 case "exit":
                     console.log("--------------------------------------------------------------------------")
@@ -69,7 +65,6 @@ function runManagementQuery() {
             }
         })
 };
-
 function runAddQuery() {
     inquirer
         .prompt({
@@ -84,7 +79,6 @@ function runAddQuery() {
             ]
         })
         .then(function (add) {
-
             switch (add.action) {
                 case "Add Departments":
                     console.log("\n-----------------------------------------------\n");
@@ -111,11 +105,8 @@ function runAddQuery() {
                     runManagementQuery();
                     break;
             }
-
-
         })
 }
-
 function addDepartment() {
     inquirer
         .prompt({
@@ -186,7 +177,6 @@ function addEmployee() {
             }
         ])
         .then(function (newEmployee) {
-
             let empQuery = 'INSERT INTO employee (first_name, last_name,role_id,manager_id) VALUES (?)'
             let empRoleId;
             let empManagerId;
@@ -343,7 +333,6 @@ function addRole() {
             });
         });
 };
-
 function viewSelection() {
     inquirer
         .prompt({
@@ -364,11 +353,11 @@ function viewSelection() {
                     break;
                 case "View Employees by department":
                     console.log("viewing department");
-                    viewSelection();
+                    viewDepartment();
                     break;
                 case "View Employees by role":
                     console.log("viewing roles");
-                    viewSelection();
+                    viewRole();
                     break;
                 case "go back":
                     runManagementQuery();
@@ -379,36 +368,210 @@ function viewSelection() {
 function viewAll() {
     let viewAllQuery = "SELECT e.id ,CONCAT( e.first_name,' ', e.last_name) AS 'employee', role.title, role.salary, CONCAT(m.first_name,' ',m.last_name) AS 'manager' FROM ((employee e INNER JOIN role ON e.role_id=role.id) INNER JOIN employee m ON m.id=e.manager_id);"
     connection.query(viewAllQuery, function (err, res) {
-        console.log(res);
-        console.log("EmployeeID           Name                    Title                   Salary                  Manager")
-        console.log("-----------------    --------------------    --------------------    --------------------    -------------------")
+        var table = new Table({
+            head: ['ID', 'Employee', 'Title', 'Salary', 'Manager']
+            , style: {
+                head: [],
+                border: []
+            }
+            , colWidths: [6, 23, 23, 23]
+        });
+        for (var i = 0; i < res.length; i++) {
+            var tableArray = [res[i].id, res[i].employee, res[i].title, res[i].salary, res[i].manager]
+            table.push(tableArray)
+        };
+        console.log(table.toString());
         viewSelection();
     })
 }
+function viewDepartment() {
+    inquirer
+        .prompt({
+            name: "dep",
+            type: "rawlist",
+            message: "Which department would you like to view?",
+            choices: [
+                "operations",
+                "marketing",
+                "technology",
+                "administration",
+                "sales",
+                "finance",
+                "product",
+                "human resources",
+                "legal"
+            ]
+        }).then(function (view) {
+            let depQuery = "SELECT department.name, employee.id, employee.first_name, employee.last_name,role.title,role.salary FROM ((department INNER JOIN role on department.id = role.department_id) inner join employee on role.id = employee.role_id) WHERE department.name = ?"
+            connection.query(depQuery, view.dep, function (err, res) {
+                let table = new Table({
+                    head: ['ID', 'Employee', 'Title', 'Salary']
+                    , style: {
+                        head: [],
+                        border: []
+                    }
+                    , colWidths: [6, 23, 23, 23]
+                });
+                for (var i = 0; i < res.length; i++) {
+                    var depArray = [res[i].id, res[i].first_name + " " + res[i].last_name, res[i].title, res[i].salary];
+                    table.push(depArray);
+                }
+                console.log(table.toString());
+                console.log(res.length + ' employees found!');
+                viewSelection();
+            })
+        })
+}
+function viewRole() {
+    inquirer
+        .prompt({
+            name: "role",
+            type: "rawlist",
+            message: "What role would would you like to review?",
+            choices: [
+                "ceo",
+                "coo",
+                "cto",
+                "cmo",
+                "cfo",
+                "coo",
+                "content_specialist",
+                "director_ux",
+                "executive_secretary",
+                "hr_specialist",
+                "outbound_sales_rep",
+                "product_manager",
+                "qa_director",
+                "qa_specialist",
+                "software_engineer",
+                "sr_account_rep",
+                "sr_content_writer",
+                "sr_developer",
+                "svp_sales",
+                "ux_designer",
+                "vp_product",
+            ]
+        })
+        .then(function (roleRes) {
+            let viewRoleQuery = "SELECT role.title, employee.first_name, employee.last_name, role.salary FROM role INNER JOIN employee ON employee.role_id=role.id WHERE role.title = ?";
+            connection.query(viewRoleQuery, roleRes.role, function (err, res) {
+                let table = new Table({
+                    head: ['Title', 'Employee', 'Salary']
+                    , style: {
+                        head: [],
+                        border: []
+                    }
+                    , colWidths: [23, 23, 23]
+                });
+                for (var i = 0; i < res.length; i++) {
+                    var tableArray = [res[i].title, res[i].first_name + " " + res[i].last_name, res[i].salary]
+                    table.push(tableArray);
+                }
+                console.log(table.toString());
+                viewSelection();
+            });
+        });
+};
+function updateRole() {
+    var getNameQuery = "SELECT CONCAT(first_name,' ',last_name) fullname FROM employee";
+    var getRoleQuery = "SELECT id,title FROM role"
+    var updateNameQuery = "UPDATE employee SET role_id= ?  WHERE CONCAT(first_name,' ',last_name)= ?";
+    var employeeArray = [];
+    var roleArray = [];
+    var roleChoice;
+    connection.query(getRoleQuery, function (err, res) {
+        for (let i = 0; i < res.length; i++) {
+            roleArray.push(res[i].title)
+        }
+        connection.query(getNameQuery, function (err, res) {
+            for (let i = 0; i < res.length; i++) {
+                employeeArray.push(res[i].fullname)
+            }
+            inquirer
+                .prompt([{
 
-// function viewDepartment() {
-//     inquirer
-//         .prompt({
-//             name: "dep",
-//             type: "rawlist",
-//             message: "Which department would you like to view?",
-//             choices: [
-//                 "operations",
-//                 "marketing",
-//                 "technology",
-//                 "administration",
-//                 "sales",
-//                 "finance",
-//                 "product",
-//                 "human resources",
-//                 "legal"
-//             ]
-//         }).then(function (view) {
-//             let depQuery = "SELECT department.name, employee.first_name, employee.last_name,role.title,role.salary FROM ((department INNER JOIN role on department.id = role.department_id) inner join employee on role.id = employee.role_id) WHERE department.name = '?'"
-
-//             connection.query(depQuery, view.dep, function (err, res) {
-//                 console.log(res.length + 'employees found!');
-//             })
-
-//         })
-// }
+                    name: "emp",
+                    type: "rawlist",
+                    message: "Which employee would you like to update?",
+                    choices: employeeArray
+                },
+                {
+                    name: "rol",
+                    type: "rawlist",
+                    message: "What would you like to update this employees role to?",
+                    choices: roleArray
+                }
+                ])
+                .then(function (emp) {
+                    console.log(emp)
+                    switch (emp.rol) {
+                        case 'ceo':
+                            roleChoice = 1;
+                            break;
+                        case 'qa_specialist':
+                            roleChoice = 2;
+                            break;
+                        case 'qa_director':
+                            roleChoice = 3;
+                            break;
+                        case 'coo':
+                            roleChoice = 4;
+                            break;
+                        case 'sr_content_writer':
+                            roleChoice = 5;
+                            break;
+                        case 'content_specialist':
+                            roleChoice = 6;
+                            break;
+                        case 'cmo':
+                            roleChoice = 7;
+                            break;
+                        case 'software_engineer':
+                            roleChoice = 8;
+                            break;
+                        case 'sr_developer':
+                            roleChoice = 9;
+                            break;
+                        case 'cto':
+                            roleChoice = 10;
+                            break;
+                        case 'executive_secretary':
+                            roleChoice = 11;
+                            break;
+                        case 'sr_account_rep':
+                            roleChoice = 12;
+                            break;
+                        case 'outbound_sales_rep':
+                            roleChoice = 13;
+                            break;
+                        case 'svp_sales':
+                            roleChoice = 14
+                            break;
+                        case 'cfo':
+                            roleChoice = 15;
+                            break;
+                        case 'ux_designer':
+                            roleChoice = 16;
+                            break;
+                        case 'director_ux':
+                            roleChoice = 17;
+                            break;
+                        case 'vp_product':
+                            roleChoice = 18;
+                            break;
+                        case 'product_manager':
+                            roleChoice = 19;
+                            break;
+                        case 'hr_specialist':
+                            roleChoice = 20;
+                            break;
+                    }
+                    console.log(roleChoice, emp.emp)
+                    connection.query(updateNameQuery, [roleChoice, emp.emp], function (err, res) {
+                        if (err) throw err;
+                    })
+                    runManagementQuery()
+                })
+        });
+    })
+};
