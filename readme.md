@@ -8,14 +8,14 @@ This application allows the user to create, view and update employee information
 Here you can see the different functions of the application being used.
 The user may add a department, a role, or an employee.​ 
 
-Add Function
-![Add Function](./assets/addfunction.gif "The application using the add department, employee and role function")
+* Add Function
+![Add Function](./assets/addfunction.gif "The application using the add department, employee and role function"),
 ​
-View Function
-![View Function](./assets/viewfunction.gif "The view function lists the employee request in a table for the user to view")
+* View Function
+![View Function](./assets/viewfunction.gif "The view function lists the employee request in a table for the user to view"),
 
-Update Function
-![Update function](./assets/updatefunction.gif "The update function allows the user to update the employee role and department")
+* Update Function
+![Update function](./assets/updatefunction.gif "The update function allows the user to update the employee role and department"),
 ​
 ​
 ### Problem
